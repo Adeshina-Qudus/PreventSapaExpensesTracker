@@ -1,9 +1,6 @@
 package sapa.prevent.services;
 
-import sapa.prevent.dtos.request.AddExpensesRequest;
-import sapa.prevent.dtos.request.AddIncomeRequest;
-import sapa.prevent.dtos.request.RegisterRequest;
-import sapa.prevent.dtos.request.LoginRequest;
+import sapa.prevent.dtos.request.*;
 
 import java.math.BigDecimal;
 
@@ -18,4 +15,6 @@ public interface UserServices {
     BigDecimal getBalance(String email);
 
     void addExpenses(AddExpensesRequest addExpensesRequest);
+
+    void addBudget(AddBudgetRequest addBudgetRequest);
 }

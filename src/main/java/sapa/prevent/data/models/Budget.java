@@ -13,5 +13,6 @@ public class Budget {
     @Id
     private String id;
     private String budgetName;
-    private double amount;
+    private BigDecimal amount;
+
 }

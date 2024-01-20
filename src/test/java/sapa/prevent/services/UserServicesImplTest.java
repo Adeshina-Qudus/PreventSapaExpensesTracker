@@ -6,11 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import sapa.prevent.data.models.Category;
 import sapa.prevent.data.models.User;
+import sapa.prevent.data.repositories.BudgetRepository;
 import sapa.prevent.data.repositories.UserRepository;
-import sapa.prevent.dtos.request.AddExpensesRequest;
-import sapa.prevent.dtos.request.AddIncomeRequest;
-import sapa.prevent.dtos.request.LoginRequest;
-import sapa.prevent.dtos.request.RegisterRequest;
+import sapa.prevent.dtos.request.*;
 import sapa.prevent.exception.EmptyDetailsException;
 import sapa.prevent.exception.InvalidDetailsException;
 import sapa.prevent.exception.UserAlreadyExistException;
@@ -28,10 +26,13 @@ public class UserServicesImplTest {
     private UserServices userServices;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private BudgetRepository budgetRepository;
 
     @AfterEach
     public void doThisAfterEachTest(){
         userRepository.deleteAll();
+        budgetRepository.deleteAll();
     }
 
     @Test
@@ -166,6 +167,34 @@ public class UserServicesImplTest {
         addExpensesRequest.setUserEmail("qudusa55@Gmail.com");
         userServices.addExpenses(addExpensesRequest);
         assertEquals(BigDecimal.valueOf(1000),userServices.getBalance("qudusa55@Gmail.com"));
+    }
+
+    @Test
+    public void addBudgetTest(){
+        RegisterRequest registerRequest = new RegisterRequest();
+        LoginRequest loginRequest = new LoginRequest();
+        registerRequest.setEmail("qudusa55@Gmail.com");
+        registerRequest.setPassword("Iniestajnr");
+        registerRequest.setConfirmPassword("Iniestajnr");
+        userServices.register(registerRequest);
+        loginRequest.setEmail("qudusa55@Gmail.com");
+        loginRequest.setPassword("Iniestajnr");
+        userServices.login(loginRequest);
+        AddIncomeRequest addIncomeRequest = new AddIncomeRequest();
+        Category category = new Category();
+        addIncomeRequest.setIncome(BigDecimal.valueOf(30000));
+        category.setNameOfCategory("building");
+        addIncomeRequest.setCategory(category);
+        addIncomeRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addIncome(addIncomeRequest);
+        Category category1 = new Category();
+        category1.setNameOfCategory("Spend Small Small");
+        AddBudgetRequest addBudgetRequest = new AddBudgetRequest();
+        addBudgetRequest.setCategory(category1);
+        addBudgetRequest.setBudgetAmount(BigDecimal.valueOf(20000));
+        addBudgetRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addBudget(addBudgetRequest);
+        assertEquals(1,budgetRepository.count());
     }
 
 }

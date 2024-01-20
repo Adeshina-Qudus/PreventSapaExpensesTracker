@@ -4,10 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sapa.prevent.data.models.*;
 import sapa.prevent.data.repositories.UserRepository;
-import sapa.prevent.dtos.request.AddExpensesRequest;
-import sapa.prevent.dtos.request.AddIncomeRequest;
-import sapa.prevent.dtos.request.LoginRequest;
-import sapa.prevent.dtos.request.RegisterRequest;
+import sapa.prevent.dtos.request.*;
+import sapa.prevent.exception.BudgetCannotBeMoreThanIncomeException;
 import sapa.prevent.exception.InvalidDetailsException;
 import sapa.prevent.exception.UserAlreadyExistException;
 
@@ -27,6 +25,8 @@ public class UserServicesImpl implements  UserServices{
     private IncomeService incomeService;
     @Autowired
     private ExpensesService expensesService;
+    @Autowired
+    private BudgetService budgetService;
 
     @Override
     public void register(RegisterRequest registerRequest) {
@@ -69,6 +69,17 @@ public class UserServicesImpl implements  UserServices{
                 foundUser.getId(),foundUser.getBalance());
         foundUser.getExpensesList().add(expenses);
         foundUser.setBalance(expenses.getAmount());
+        userRepository.save(foundUser);
+    }
+
+    @Override
+    public void addBudget(AddBudgetRequest addBudgetRequest) {
+        User foundUser = userRepository.findByEmail(addBudgetRequest.getEmail());
+        Budget budget = budgetService.addBudget(addBudgetRequest.getBudgetAmount(),addBudgetRequest.getCategory(),
+                foundUser.getId());
+        int compareTo = foundUser.getBalance().compareTo(budget.getAmount());
+        if (compareTo < 0) throw new BudgetCannotBeMoreThanIncomeException(budget.getAmount()+" is more than income");
+        foundUser.setBudget(budget);
         userRepository.save(foundUser);
     }
 
