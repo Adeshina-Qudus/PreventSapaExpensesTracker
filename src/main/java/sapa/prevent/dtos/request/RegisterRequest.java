@@ -1,4 +1,4 @@
-package sapa.prevent.dtos;
+package sapa.prevent.dtos.request;
 
 import lombok.Data;
 

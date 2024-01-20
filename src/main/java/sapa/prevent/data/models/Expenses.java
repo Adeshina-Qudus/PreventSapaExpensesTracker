@@ -15,6 +15,5 @@ public class Expenses {
     private String id;
     private Category category;
     private BigDecimal amount;
-    private LocalDateTime localDateTime ;
-    private User user;
+    private LocalDateTime localDateTime = LocalDateTime.now();
 }

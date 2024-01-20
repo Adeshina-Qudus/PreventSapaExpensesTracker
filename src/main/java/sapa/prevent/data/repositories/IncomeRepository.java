@@ -5,4 +5,5 @@ import sapa.prevent.data.models.Income;
 
 public interface IncomeRepository extends MongoRepository<Income,String> {
 
+
 }

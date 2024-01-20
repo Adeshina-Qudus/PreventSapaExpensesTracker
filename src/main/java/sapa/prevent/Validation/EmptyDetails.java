@@ -1,6 +1,6 @@
 package sapa.prevent.Validation;
 
-import sapa.prevent.dtos.RegisterRequest;
+import sapa.prevent.dtos.request.RegisterRequest;
 import sapa.prevent.exception.EmptyDetailsException;
 
 public class EmptyDetails {
