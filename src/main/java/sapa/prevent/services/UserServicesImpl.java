@@ -7,14 +7,9 @@ import sapa.prevent.data.repositories.UserRepository;
 import sapa.prevent.dtos.request.*;
 import sapa.prevent.exception.BudgetCannotBeMoreThanIncomeException;
 import sapa.prevent.exception.InvalidDetailsException;
+import sapa.prevent.exception.IsExceedBudgetLimitException;
 import sapa.prevent.exception.UserAlreadyExistException;
-
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Optional;
-
 import static sapa.prevent.utils.Mapper.map;
 
 @Service
@@ -29,7 +24,7 @@ public class UserServicesImpl implements  UserServices{
     private BudgetService budgetService;
 
     @Override
-    public void register(RegisterRequest registerRequest) {
+    public void registration(RegistrationRequest registerRequest) {
         if (userExist(registerRequest.getEmail())) throw new UserAlreadyExistException(
                 registerRequest.getEmail()+" Already Exist");
         User user = map(registerRequest);
@@ -49,10 +44,9 @@ public class UserServicesImpl implements  UserServices{
     @Override
     public void addIncome(AddIncomeRequest addIncomeRequest) {
         User founduser = userRepository.findByEmail(addIncomeRequest.getEmail());
-        Income income = incomeService.addIncome(addIncomeRequest.getIncome(),addIncomeRequest.getCategory(),founduser.getId(),
-                founduser.getBalance());
+        Income income = incomeService.addIncome(addIncomeRequest.getIncome(),addIncomeRequest.getCategory(),founduser.getId());
         founduser.getIncomeList().add(income);
-        founduser.setBalance(income.getAmountOfIncome());
+        founduser.setBalance(founduser.getBalance().add(income.getAmountOfIncome()));
         userRepository.save(founduser);
     }
 
@@ -66,14 +60,17 @@ public class UserServicesImpl implements  UserServices{
     public void addExpenses(AddExpensesRequest addExpensesRequest) {
         User foundUser = userRepository.findByEmail(addExpensesRequest.getUserEmail());
         Expenses expenses = expensesService.addExpenses(addExpensesRequest.getAmount(),addExpensesRequest.getCategory(),
-                foundUser.getId(),foundUser.getBalance());
+                foundUser.getId());
         foundUser.getExpensesList().add(expenses);
-        foundUser.setBalance(expenses.getAmount());
+        int compareTo = foundUser.getBudget().getAmount().compareTo(expenses.getAmount());
+        if (compareTo < 0) {
+            throw new IsExceedBudgetLimitException("Budget Limit Exceeded");
+        }
+        foundUser.setBalance(foundUser.getBalance().subtract(expenses.getAmount()));
         userRepository.save(foundUser);
     }
-
     @Override
-    public void addBudget(AddBudgetRequest addBudgetRequest) {
+    public Object addBudget(AddBudgetRequest addBudgetRequest) {
         User foundUser = userRepository.findByEmail(addBudgetRequest.getEmail());
         Budget budget = budgetService.addBudget(addBudgetRequest.getBudgetAmount(),addBudgetRequest.getCategory(),
                 foundUser.getId());
@@ -81,6 +78,7 @@ public class UserServicesImpl implements  UserServices{
         if (compareTo < 0) throw new BudgetCannotBeMoreThanIncomeException(budget.getAmount()+" is more than income");
         foundUser.setBudget(budget);
         userRepository.save(foundUser);
+        return null;
     }
 
     private boolean userExist(String email) {

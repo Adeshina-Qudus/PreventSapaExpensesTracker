@@ -17,7 +17,6 @@ public class User {
     private String id;
     private String email;
     private String password;
-    private String confirmPassword;
     private LocalDateTime dateTime = LocalDateTime.now();
     private BigDecimal balance = new BigDecimal(0) ;
     private ArrayList<Income> incomeList = new ArrayList<Income>();

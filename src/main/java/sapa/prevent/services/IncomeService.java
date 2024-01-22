@@ -7,5 +7,5 @@ import java.math.BigDecimal;
 
 public interface IncomeService {
 
-    Income addIncome(BigDecimal income, Category category, String id, BigDecimal balance);
+    Income addIncome(BigDecimal income, Category category, String id);
 }

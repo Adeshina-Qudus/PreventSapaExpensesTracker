@@ -7,15 +7,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import sapa.prevent.data.models.Category;
 import sapa.prevent.data.models.User;
 import sapa.prevent.data.repositories.BudgetRepository;
+import sapa.prevent.data.repositories.IncomeRepository;
 import sapa.prevent.data.repositories.UserRepository;
 import sapa.prevent.dtos.request.*;
-import sapa.prevent.exception.EmptyDetailsException;
-import sapa.prevent.exception.InvalidDetailsException;
-import sapa.prevent.exception.UserAlreadyExistException;
+import sapa.prevent.exception.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,80 +25,83 @@ public class UserServicesImplTest {
     private UserRepository userRepository;
     @Autowired
     private BudgetRepository budgetRepository;
+    @Autowired
+    private IncomeRepository incomeRepository;
 
     @AfterEach
     public void doThisAfterEachTest(){
         userRepository.deleteAll();
         budgetRepository.deleteAll();
+        incomeRepository.deleteAll();
     }
 
     @Test
     public void userRegisterAndUserIsOneTest(){
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
-        userServices.register(registerRequest);
+        userServices.registration(registerRequest);
         assertEquals(1,userRepository.count());
     }
     @Test
     public void userRegisterAndUserIsLockedTest(){
         User user = new User();
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
-        userServices.register(registerRequest);
+        userServices.registration(registerRequest);
         assertTrue(user.isLocked());
     }
     @Test
     public void userRegisterWithAnEmptyEmailThrowExceptionTest(){
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         registerRequest.setEmail("");
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
-        assertThrows(EmptyDetailsException.class , ()-> userServices.register(registerRequest));
+        assertThrows(EmptyDetailsException.class , ()-> userServices.registration(registerRequest));
     }
     @Test
     public void userRegisterWithAnEmptyPasswordThrowExceptionTest(){
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("");
         registerRequest.setConfirmPassword("Iniestajnr");
-        assertThrows(EmptyDetailsException.class , ()-> userServices.register(registerRequest));
+        assertThrows(EmptyDetailsException.class , ()-> userServices.registration(registerRequest));
     }
     @Test
     public void userRegisterWithOneEmailTwiceThrowExceptionTest(){
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
-        userServices.register(registerRequest);
+        userServices.registration(registerRequest);
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("qudus");
         registerRequest.setConfirmPassword("qudus");
-        assertThrows(UserAlreadyExistException.class , ()-> userServices.register(registerRequest));
+        assertThrows(UserAlreadyExistException.class , ()-> userServices.registration(registerRequest));
     }
     @Test
     public void userLoginWithWrongPasswordThroeExceptionTest(){
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         LoginRequest loginRequest = new LoginRequest();
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
-        userServices.register(registerRequest);
+        userServices.registration(registerRequest);
         loginRequest.setEmail("qudusa55@Gmail.com");
         loginRequest.setPassword("Iniestajnr1");
         assertThrows(InvalidDetailsException.class, ()-> userServices.login(loginRequest));
     }
     @Test
     public void addIncomeTest(){
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         LoginRequest loginRequest = new LoginRequest();
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
-        userServices.register(registerRequest);
+        userServices.registration(registerRequest);
         loginRequest.setEmail("qudusa55@Gmail.com");
         loginRequest.setPassword("Iniestajnr");
         userServices.login(loginRequest);
@@ -116,12 +116,12 @@ public class UserServicesImplTest {
     }
     @Test
     public void addIncomeTwiceTest(){
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         LoginRequest loginRequest = new LoginRequest();
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
-        userServices.register(registerRequest);
+        userServices.registration(registerRequest);
         loginRequest.setEmail("qudusa55@Gmail.com");
         loginRequest.setPassword("Iniestajnr");
         userServices.login(loginRequest);
@@ -143,12 +143,12 @@ public class UserServicesImplTest {
     }
     @Test
     public void addExpensesTest(){
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         LoginRequest loginRequest = new LoginRequest();
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
-        userServices.register(registerRequest);
+        userServices.registration(registerRequest);
         loginRequest.setEmail("qudusa55@Gmail.com");
         loginRequest.setPassword("Iniestajnr");
         userServices.login(loginRequest);
@@ -159,6 +159,13 @@ public class UserServicesImplTest {
         addIncomeRequest.setCategory(category);
         addIncomeRequest.setEmail("qudusa55@Gmail.com");
         userServices.addIncome(addIncomeRequest);
+        Category category3 = new Category();
+        category3.setNameOfCategory("Spend Small Small");
+        AddBudgetRequest addBudgetRequest = new AddBudgetRequest();
+        addBudgetRequest.setCategory(category3);
+        addBudgetRequest.setBudgetAmount(BigDecimal.valueOf(2500));
+        addBudgetRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addBudget(addBudgetRequest);
         AddExpensesRequest addExpensesRequest = new AddExpensesRequest();
         Category category1 = new Category();
         addExpensesRequest.setAmount(BigDecimal.valueOf(2000));
@@ -171,12 +178,12 @@ public class UserServicesImplTest {
 
     @Test
     public void addBudgetTest(){
-        RegisterRequest registerRequest = new RegisterRequest();
+        RegistrationRequest registerRequest = new RegistrationRequest();
         LoginRequest loginRequest = new LoginRequest();
         registerRequest.setEmail("qudusa55@Gmail.com");
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
-        userServices.register(registerRequest);
+        userServices.registration(registerRequest);
         loginRequest.setEmail("qudusa55@Gmail.com");
         loginRequest.setPassword("Iniestajnr");
         userServices.login(loginRequest);
@@ -195,6 +202,66 @@ public class UserServicesImplTest {
         addBudgetRequest.setEmail("qudusa55@Gmail.com");
         userServices.addBudget(addBudgetRequest);
         assertEquals(1,budgetRepository.count());
+    }
+    @Test
+    public void budgetCannotBeMoreThanIncomeTest(){
+        RegistrationRequest registerRequest = new RegistrationRequest();
+        LoginRequest loginRequest = new LoginRequest();
+        registerRequest.setEmail("qudusa55@Gmail.com");
+        registerRequest.setPassword("Iniestajnr");
+        registerRequest.setConfirmPassword("Iniestajnr");
+        userServices.registration(registerRequest);
+        loginRequest.setEmail("qudusa55@Gmail.com");
+        loginRequest.setPassword("Iniestajnr");
+        userServices.login(loginRequest);
+        AddIncomeRequest addIncomeRequest = new AddIncomeRequest();
+        Category category = new Category();
+        addIncomeRequest.setIncome(BigDecimal.valueOf(20000));
+        category.setNameOfCategory("building");
+        addIncomeRequest.setCategory(category);
+        addIncomeRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addIncome(addIncomeRequest);
+        Category category1 = new Category();
+        category1.setNameOfCategory("Spend Small Small");
+        AddBudgetRequest addBudgetRequest = new AddBudgetRequest();
+        addBudgetRequest.setCategory(category1);
+        addBudgetRequest.setBudgetAmount(BigDecimal.valueOf(30000));
+        addBudgetRequest.setEmail("qudusa55@Gmail.com");
+        assertThrows(BudgetCannotBeMoreThanIncomeException.class,()->userServices.addBudget(addBudgetRequest));
+    }
+    @Test
+    public void isExceedBudgetLimitTest(){
+        RegistrationRequest registerRequest = new RegistrationRequest();
+        LoginRequest loginRequest = new LoginRequest();
+        registerRequest.setEmail("qudusa55@Gmail.com");
+        registerRequest.setPassword("Iniestajnr");
+        registerRequest.setConfirmPassword("Iniestajnr");
+        userServices.registration(registerRequest);
+        loginRequest.setEmail("qudusa55@Gmail.com");
+        loginRequest.setPassword("Iniestajnr");
+        userServices.login(loginRequest);
+        AddIncomeRequest addIncomeRequest = new AddIncomeRequest();
+        Category category = new Category();
+        addIncomeRequest.setIncome(BigDecimal.valueOf(100));
+        category.setNameOfCategory("building");
+        addIncomeRequest.setCategory(category);
+        addIncomeRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addIncome(addIncomeRequest);
+        Category category1 = new Category();
+        category1.setNameOfCategory("Spend Small Small");
+        AddBudgetRequest addBudgetRequest = new AddBudgetRequest();
+        addBudgetRequest.setCategory(category1);
+        addBudgetRequest.setBudgetAmount(BigDecimal.valueOf(70));
+        addBudgetRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addBudget(addBudgetRequest);
+        AddExpensesRequest addExpensesRequest = new AddExpensesRequest();
+        Category category2 = new Category();
+        category2.setNameOfCategory("Shayo");
+        addExpensesRequest.setCategory(category2);
+        addExpensesRequest.setAmount(BigDecimal.valueOf(80));
+        addExpensesRequest.setUserEmail("qudusa55@Gmail.com");
+        assertThrows(IsExceedBudgetLimitException.class,
+                ()->userServices.addExpenses(addExpensesRequest));
     }
 
 }

@@ -8,4 +8,5 @@ import java.math.BigDecimal;
 public interface BudgetService {
 
     Budget addBudget(BigDecimal budgetAmount, Category category, String id);
+
 }
