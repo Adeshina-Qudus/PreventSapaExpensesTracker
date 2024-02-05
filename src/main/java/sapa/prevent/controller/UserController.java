@@ -45,7 +45,8 @@ public class UserController {
         try {
             userServices.addIncome(addIncomeRequest);
             addIncomeResponse.setMessage( "Income added successfully." +
-                    " Your records have been updated.");
+                    " Your records have been updated."+
+                    "Your Balance is "+userServices.getBalance(addIncomeRequest.getEmail()));
             return new ResponseEntity<>(new ApiResponse(true,addIncomeResponse),HttpStatus.OK);
         }catch (ExpensesTrackerException exception){
             addIncomeResponse.setMessage(exception.getMessage());
@@ -68,14 +69,15 @@ public class UserController {
         try {
             userServices.addExpenses(addExpensesRequest);
             addExpensesResponse.setMessage("Expense added successfully. " +
-                    "Your records have been updated.");
+                    "Your records have been updated."+
+                    "Your Balance is "+userServices.getBalance(addExpensesRequest.getUserEmail()));
             return new ResponseEntity<>(new ApiResponse(true,addExpensesResponse),HttpStatus.OK);
         }catch (ExpensesTrackerException exception){
             addExpensesResponse.setMessage(exception.getMessage());
             return new ResponseEntity<>(new ApiResponse(false,addExpensesResponse),HttpStatus.NOT_ACCEPTABLE);
         }
     }
-    @PostMapping("/addBUdget")
+    @PostMapping("/addBudget")
     public ResponseEntity<?> addBudget(@RequestBody AddBudgetRequest addBudgetRequest){
         AddBudgetResponse addBudgetResponse = new AddBudgetResponse();
         try {

@@ -13,6 +13,7 @@ import sapa.prevent.dtos.request.*;
 import sapa.prevent.exception.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -52,7 +53,7 @@ public class UserServicesImplTest {
         registerRequest.setPassword("Iniestajnr");
         registerRequest.setConfirmPassword("Iniestajnr");
         userServices.registration(registerRequest);
-        assertTrue(user.isLocked());
+        assertFalse(user.isLocked());
     }
     @Test
     public void userRegisterWithAnEmptyEmailThrowExceptionTest(){

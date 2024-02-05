@@ -13,12 +13,15 @@ public class IncomeServiceImpl  implements IncomeService{
 
     @Autowired
     private IncomeRepository incomeRepository;
+    @Autowired
+    private CategoryService categoryService;
     @Override
     public Income addIncome(BigDecimal income, Category category, String id) {
         Income income1 = new Income();
         income1.setId(id);
         income1.setAmountOfIncome(income);
         income1.setCategory(category);
+        categoryService.addCategory(category);
         incomeRepository.save(income1);
         return income1;
     }

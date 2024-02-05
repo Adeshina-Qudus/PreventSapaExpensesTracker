@@ -22,8 +22,6 @@ public class User {
     private ArrayList<Income> incomeList = new ArrayList<Income>();
     private List<Expenses> expensesList = new ArrayList<Expenses>();
     private Budget budget;
-    private boolean isLocked = true;
+    private boolean isLocked = false;
     private boolean isExceedBudget;
-
-
 }

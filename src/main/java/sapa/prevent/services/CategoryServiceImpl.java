@@ -8,5 +8,13 @@ import sapa.prevent.data.repositories.CategoryRepository;
 @Service
 public class CategoryServiceImpl implements  CategoryService {
 
-
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Override
+    public void addCategory(Category category) {
+        Category category1 = new Category();
+        category1.setId(category1.getId());
+        category1.setNameOfCategory(category.getNameOfCategory());
+        categoryRepository.save(category1);
+    }
 }

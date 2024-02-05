@@ -5,10 +5,8 @@ import org.springframework.stereotype.Service;
 import sapa.prevent.data.models.*;
 import sapa.prevent.data.repositories.UserRepository;
 import sapa.prevent.dtos.request.*;
-import sapa.prevent.exception.BudgetCannotBeMoreThanIncomeException;
-import sapa.prevent.exception.InvalidDetailsException;
-import sapa.prevent.exception.IsExceedBudgetLimitException;
-import sapa.prevent.exception.UserAlreadyExistException;
+import sapa.prevent.exception.*;
+
 import java.math.BigDecimal;
 import static sapa.prevent.utils.Mapper.map;
 
@@ -22,6 +20,7 @@ public class UserServicesImpl implements  UserServices{
     private ExpensesService expensesService;
     @Autowired
     private BudgetService budgetService;
+
 
     @Override
     public void registration(RegistrationRequest registerRequest) {
@@ -37,28 +36,41 @@ public class UserServicesImpl implements  UserServices{
                 loginRequest.getEmail()+" Is Invalid");
         if (!foundUser.getPassword().equals(loginRequest.getPassword())) throw new InvalidDetailsException(
                 "invalid DetailS");
-        foundUser.setLocked(false);
+        foundUser.setLocked(true);
         userRepository.save(foundUser);
     }
-
     @Override
     public void addIncome(AddIncomeRequest addIncomeRequest) {
+        if (!userExist(addIncomeRequest.getEmail())) throw new UserNotFoundException(
+                addIncomeRequest.getEmail()+" Doesn't Exist ");
         User founduser = userRepository.findByEmail(addIncomeRequest.getEmail());
+        validateIfUserIsActive(founduser);
         Income income = incomeService.addIncome(addIncomeRequest.getIncome(),addIncomeRequest.getCategory(),founduser.getId());
         founduser.getIncomeList().add(income);
         founduser.setBalance(founduser.getBalance().add(income.getAmountOfIncome()));
         userRepository.save(founduser);
     }
 
-    @Override
-    public BigDecimal getBalance(String email) {
-        User user = userRepository.findByEmail(email);
-        return  user.getBalance();
+    private static void validateIfUserIsActive(User founduser) {
+        if (!founduser.isLocked()){
+            throw new AppLockedException("Kindly login");
+        }
     }
 
     @Override
+    public BigDecimal getBalance(String email) {
+        if (!userExist(email)) throw new UserNotFoundException(
+                email+" Doesn't Exist ");
+        User user = userRepository.findByEmail(email);
+        validateIfUserIsActive(user);
+        return  user.getBalance();
+    }
+    @Override
     public void addExpenses(AddExpensesRequest addExpensesRequest) {
+        if (!userExist(addExpensesRequest.getUserEmail())) throw new UserNotFoundException(
+                addExpensesRequest.getUserEmail()+" Doesn't Exist ");
         User foundUser = userRepository.findByEmail(addExpensesRequest.getUserEmail());
+        validateIfUserIsActive(foundUser);
         Expenses expenses = expensesService.addExpenses(addExpensesRequest.getAmount(),addExpensesRequest.getCategory(),
                 foundUser.getId());
         foundUser.getExpensesList().add(expenses);
@@ -71,6 +83,8 @@ public class UserServicesImpl implements  UserServices{
     }
     @Override
     public Object addBudget(AddBudgetRequest addBudgetRequest) {
+        if (!userExist(addBudgetRequest.getEmail())) throw new UserNotFoundException(
+                addBudgetRequest.getEmail()+" Doesn't Exist ");
         User foundUser = userRepository.findByEmail(addBudgetRequest.getEmail());
         Budget budget = budgetService.addBudget(addBudgetRequest.getBudgetAmount(),addBudgetRequest.getCategory(),
                 foundUser.getId());
@@ -78,7 +92,7 @@ public class UserServicesImpl implements  UserServices{
         if (compareTo < 0) throw new BudgetCannotBeMoreThanIncomeException(budget.getAmount()+" is more than income");
         foundUser.setBudget(budget);
         userRepository.save(foundUser);
-        return null;
+        return foundUser.getBudget();
     }
 
     private boolean userExist(String email) {
