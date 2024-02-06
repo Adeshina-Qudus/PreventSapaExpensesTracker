@@ -58,8 +58,10 @@ public class UserController {
         GetBalanceResponse getBalanceResponse = new GetBalanceResponse();
         try {
             getBalanceResponse.setBalance(userServices.getBalance(email));
+            getBalanceResponse.setMessage("Balance is "+userServices.getBalance(email));
             return new ResponseEntity<>(new ApiResponse(true,getBalanceResponse),HttpStatus.OK);
         }catch(ExpensesTrackerException exception){
+            getBalanceResponse.setMessage(exception.getMessage());
             return new ResponseEntity<>(new ApiResponse(false,getBalanceResponse),HttpStatus.BAD_REQUEST);
         }
     }
