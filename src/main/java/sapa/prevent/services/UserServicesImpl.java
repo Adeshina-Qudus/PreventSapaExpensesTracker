@@ -122,14 +122,6 @@ public class UserServicesImpl implements  UserServices{
         return history.getExpensesList();
     }
 
-    @Override
-    public void deleteHistory(String mail) {
-        if (!userExist(mail)) throw new UserNotFoundException(
-                mail+" Doesn't Exist");
-        User user = userRepository.findByEmail(mail);
-        validateIfUserIsActive(user);
-        historyService.deleteAllHistory();
-    }
 
     private boolean userExist(String email) {
         User foundUser = userRepository.findByEmail(email);
