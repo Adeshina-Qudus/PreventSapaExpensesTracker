@@ -1,5 +1,4 @@
 package sapa.prevent.controller;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,10 +7,8 @@ import sapa.prevent.dtos.request.*;
 import sapa.prevent.dtos.response.*;
 import sapa.prevent.exception.ExpensesTrackerException;
 import sapa.prevent.services.UserServices;
-
 @RestController
 public class UserController {
-
     @Autowired
     private UserServices userServices;
 
@@ -89,6 +86,39 @@ public class UserController {
         }catch (ExpensesTrackerException exception){
             addBudgetResponse.setMessage(exception.getMessage());
             return new ResponseEntity<>(new ApiResponse(false,addBudgetResponse),HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
+    @GetMapping("/history/{mail}")
+    public ResponseEntity<?> history(@PathVariable("mail") String mail){
+        HistoryResponse historyResponse = new HistoryResponse();
+        try {
+            historyResponse.setAllTransaction(userServices.getHistory(mail));
+            return new ResponseEntity<>(new ApiResponse(true,historyResponse),HttpStatus.OK);
+        }catch (ExpensesTrackerException exception){
+            historyResponse.setAllTransaction(exception.getMessage());
+            return new ResponseEntity<>(new ApiResponse(false,historyResponse),HttpStatus.NOT_ACCEPTABLE);
+        }
+    }
+    @GetMapping("/allIncomeHistory/{mail}")
+    public ResponseEntity<?> allIncomeHistory(@PathVariable("mail") String mail){
+        AllIncomeResponse incomeResponse = new AllIncomeResponse();
+        try {
+            incomeResponse.setAllIncome(userServices.getAllIncomeList(mail));
+            return new ResponseEntity<>(new ApiResponse(true,incomeResponse),HttpStatus.OK);
+        }catch(ExpensesTrackerException exception){
+            incomeResponse.setAllIncome(exception.getMessage());
+            return new ResponseEntity<>(new ApiResponse(false,incomeResponse),HttpStatus.NOT_IMPLEMENTED);
+        }
+    }
+    @GetMapping("/allExpensesHistory/{mail}")
+    public ResponseEntity<?> allExpensesHistory(@PathVariable("mail") String mail){
+        AllExpensesResponse allExpenses = new AllExpensesResponse();
+        try {
+            allExpenses.setAllExpenses(userServices.getAllExpenses(mail));
+            return new ResponseEntity<>(new ApiResponse(true,allExpenses),HttpStatus.OK);
+        }catch (ExpensesTrackerException exception){
+            allExpenses.setAllExpenses(exception.getMessage());
+            return new ResponseEntity<>(new ApiResponse(false,allExpenses),HttpStatus.NOT_IMPLEMENTED);
         }
     }
 }

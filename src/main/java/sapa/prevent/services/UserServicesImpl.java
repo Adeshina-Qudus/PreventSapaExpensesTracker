@@ -8,6 +8,7 @@ import sapa.prevent.dtos.request.*;
 import sapa.prevent.exception.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import static sapa.prevent.utils.Mapper.map;
 
 @Service
@@ -20,8 +21,8 @@ public class UserServicesImpl implements  UserServices{
     private ExpensesService expensesService;
     @Autowired
     private BudgetService budgetService;
-
-
+    @Autowired
+    private HistoryService historyService;
     @Override
     public void registration(RegistrationRequest registerRequest) {
         if (userExist(registerRequest.getEmail())) throw new UserAlreadyExistException(
@@ -50,7 +51,6 @@ public class UserServicesImpl implements  UserServices{
         founduser.setBalance(founduser.getBalance().add(income.getAmountOfIncome()));
         userRepository.save(founduser);
     }
-
     private static void validateIfUserIsActive(User founduser) {
         if (!founduser.isLocked()){
             throw new AppLockedException("Kindly login");
@@ -93,6 +93,42 @@ public class UserServicesImpl implements  UserServices{
         foundUser.setBudget(budget);
         userRepository.save(foundUser);
         return foundUser.getBudget();
+    }
+    @Override
+    public List<Object> getHistory(String mail) {
+        if (!userExist(mail)) throw new UserNotFoundException(
+                mail+" Doesn't Exist ");
+        User foundUser = userRepository.findByEmail(mail);
+        validateIfUserIsActive(foundUser);
+        History history = historyService.addToHistory(foundUser.getIncomeList(),foundUser.getExpensesList(),foundUser.getBudget());
+        return history.getAllTransaction();
+    }
+    @Override
+    public List<Income> getAllIncomeList(String mail) {
+        if (!userExist(mail)) throw new UserNotFoundException(
+                mail+" Doesn't Exist ");
+        User foundUser = userRepository.findByEmail(mail);
+        validateIfUserIsActive(foundUser);
+        History history = historyService.getAllIncome(foundUser.getIncomeList());
+        return history.getIncomeList();
+    }
+    @Override
+    public List<Expenses> getAllExpenses(String mail) {
+        if (!userExist(mail)) throw new UserNotFoundException(
+                mail+" Doesn't Exist ");
+        User foundUser = userRepository.findByEmail(mail);
+        validateIfUserIsActive(foundUser);
+        History history = historyService.getAllExpenses(foundUser.getExpensesList());
+        return history.getExpensesList();
+    }
+
+    @Override
+    public void deleteHistory(String mail) {
+        if (!userExist(mail)) throw new UserNotFoundException(
+                mail+" Doesn't Exist");
+        User user = userRepository.findByEmail(mail);
+        validateIfUserIsActive(user);
+        historyService.deleteAllHistory();
     }
 
     private boolean userExist(String email) {

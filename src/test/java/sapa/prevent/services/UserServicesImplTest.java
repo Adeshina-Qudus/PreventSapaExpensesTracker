@@ -5,8 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import sapa.prevent.data.models.Category;
+import sapa.prevent.data.models.Expenses;
+import sapa.prevent.data.models.Income;
 import sapa.prevent.data.models.User;
 import sapa.prevent.data.repositories.BudgetRepository;
+import sapa.prevent.data.repositories.HistoryRepository;
 import sapa.prevent.data.repositories.IncomeRepository;
 import sapa.prevent.data.repositories.UserRepository;
 import sapa.prevent.dtos.request.*;
@@ -14,6 +17,7 @@ import sapa.prevent.exception.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,6 +32,8 @@ public class UserServicesImplTest {
     private BudgetRepository budgetRepository;
     @Autowired
     private IncomeRepository incomeRepository;
+    @Autowired
+    private HistoryRepository historyRepository;
 
     @AfterEach
     public void doThisAfterEachTest(){
@@ -263,6 +269,112 @@ public class UserServicesImplTest {
         addExpensesRequest.setUserEmail("qudusa55@Gmail.com");
         assertThrows(IsExceedBudgetLimitException.class,
                 ()->userServices.addExpenses(addExpensesRequest));
+    }
+    @Test
+    public void getHistoryTest(){
+        RegistrationRequest registerRequest = new RegistrationRequest();
+        LoginRequest loginRequest = new LoginRequest();
+        registerRequest.setEmail("qudusa55@Gmail.com");
+        registerRequest.setPassword("Iniestajnr");
+        registerRequest.setConfirmPassword("Iniestajnr");
+        userServices.registration(registerRequest);
+        loginRequest.setEmail("qudusa55@Gmail.com");
+        loginRequest.setPassword("Iniestajnr");
+        userServices.login(loginRequest);
+        AddIncomeRequest addIncomeRequest = new AddIncomeRequest();
+        Category category = new Category();
+        addIncomeRequest.setIncome(BigDecimal.valueOf(3000));
+        category.setNameOfCategory("building");
+        addIncomeRequest.setCategory(category);
+        addIncomeRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addIncome(addIncomeRequest);
+        Category category3 = new Category();
+        category3.setNameOfCategory("Spend Small Small");
+        AddBudgetRequest addBudgetRequest = new AddBudgetRequest();
+        addBudgetRequest.setCategory(category3);
+        addBudgetRequest.setBudgetAmount(BigDecimal.valueOf(2500));
+        addBudgetRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addBudget(addBudgetRequest);
+        AddExpensesRequest addExpensesRequest = new AddExpensesRequest();
+        Category category1 = new Category();
+        addExpensesRequest.setAmount(BigDecimal.valueOf(2000));
+        category1.setNameOfCategory("Clubbing");
+        addExpensesRequest.setCategory(category1);
+        addExpensesRequest.setUserEmail("qudusa55@Gmail.com");
+        userServices.addExpenses(addExpensesRequest);
+        List<Object> objectList = userServices.getHistory("qudusa55@Gmail.com");
+        assertEquals(3,objectList.size());
+    }
+    @Test
+    public void getAllIncomeTest(){
+        RegistrationRequest registerRequest = new RegistrationRequest();
+        LoginRequest loginRequest = new LoginRequest();
+        registerRequest.setEmail("qudusa55@Gmail.com");
+        registerRequest.setPassword("Iniestajnr");
+        registerRequest.setConfirmPassword("Iniestajnr");
+        userServices.registration(registerRequest);
+        loginRequest.setEmail("qudusa55@Gmail.com");
+        loginRequest.setPassword("Iniestajnr");
+        userServices.login(loginRequest);
+        AddIncomeRequest addIncomeRequest = new AddIncomeRequest();
+        Category category = new Category();
+        addIncomeRequest.setIncome(BigDecimal.valueOf(3000));
+        category.setNameOfCategory("building");
+        addIncomeRequest.setCategory(category);
+        addIncomeRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addIncome(addIncomeRequest);
+        AddIncomeRequest addIncomeRequest1 = new AddIncomeRequest();
+        Category category1 = new Category();
+        addIncomeRequest1.setIncome(BigDecimal.valueOf(4000));
+        category1.setNameOfCategory("Yahoo");
+        addIncomeRequest1.setCategory(category1);
+        addIncomeRequest1.setEmail("qudusa55@Gmail.com");
+        userServices.addIncome(addIncomeRequest1);
+        List<Income> incomeList = userServices.getAllIncomeList("qudusa55@Gmail.com");
+        assertEquals(2,incomeList.size());
+    }
+
+    @Test
+    public void getAllExpensesTest() {
+        RegistrationRequest registerRequest = new RegistrationRequest();
+        LoginRequest loginRequest = new LoginRequest();
+        registerRequest.setEmail("qudusa55@Gmail.com");
+        registerRequest.setPassword("Iniestajnr");
+        registerRequest.setConfirmPassword("Iniestajnr");
+        userServices.registration(registerRequest);
+        loginRequest.setEmail("qudusa55@Gmail.com");
+        loginRequest.setPassword("Iniestajnr");
+        userServices.login(loginRequest);
+        AddIncomeRequest addIncomeRequest = new AddIncomeRequest();
+        Category category = new Category();
+        addIncomeRequest.setIncome(BigDecimal.valueOf(99000));
+        category.setNameOfCategory("building");
+        addIncomeRequest.setCategory(category);
+        addIncomeRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addIncome(addIncomeRequest);
+        Category category3 = new Category();
+        category3.setNameOfCategory("Spend Small Small");
+        AddBudgetRequest addBudgetRequest = new AddBudgetRequest();
+        addBudgetRequest.setCategory(category3);
+        addBudgetRequest.setBudgetAmount(BigDecimal.valueOf(25000));
+        addBudgetRequest.setEmail("qudusa55@Gmail.com");
+        userServices.addBudget(addBudgetRequest);
+        AddExpensesRequest addExpensesRequest = new AddExpensesRequest();
+        Category category1 = new Category();
+        addExpensesRequest.setAmount(BigDecimal.valueOf(2000));
+        category1.setNameOfCategory("Clubbing");
+        addExpensesRequest.setCategory(category1);
+        addExpensesRequest.setUserEmail("qudusa55@Gmail.com");
+        userServices.addExpenses(addExpensesRequest);
+        AddExpensesRequest addExpensesRequest1 = new AddExpensesRequest();
+        Category category2 = new Category();
+        addExpensesRequest1.setAmount(BigDecimal.valueOf(2000));
+        category1.setNameOfCategory("Clubbing");
+        addExpensesRequest1.setCategory(category2);
+        addExpensesRequest1.setUserEmail("qudusa55@Gmail.com");
+        userServices.addExpenses(addExpensesRequest1);
+        List<Expenses> expensesList = userServices.getAllExpenses("qudusa55@Gmail.com");
+        assertEquals(2, expensesList.size());
     }
 
 }
