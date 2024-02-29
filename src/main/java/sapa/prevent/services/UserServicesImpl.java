@@ -1,13 +1,13 @@
 package sapa.prevent.services;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sapa.prevent.data.models.*;
 import sapa.prevent.data.repositories.UserRepository;
 import sapa.prevent.dtos.request.*;
 import sapa.prevent.exception.*;
-
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import static sapa.prevent.utils.Mapper.map;
 
@@ -47,8 +47,10 @@ public class UserServicesImpl implements  UserServices{
         User founduser = userRepository.findByEmail(addIncomeRequest.getEmail());
         validateIfUserIsActive(founduser);
         Income income = incomeService.addIncome(addIncomeRequest.getIncome(),addIncomeRequest.getCategory(),founduser.getId());
-        founduser.getIncomeList().add(income);
         founduser.setBalance(founduser.getBalance().add(income.getAmountOfIncome()));
+        founduser.getHistory().getIncomeList().add(income);
+        founduser.getHistory().setIncomeList(founduser.getHistory().getIncomeList());
+        founduser.getHistory().setAllTransaction(Collections.singletonList(founduser.getHistory().getAllTransaction().add(income)));
         userRepository.save(founduser);
     }
     private static void validateIfUserIsActive(User founduser) {
@@ -73,12 +75,15 @@ public class UserServicesImpl implements  UserServices{
         validateIfUserIsActive(foundUser);
         Expenses expenses = expensesService.addExpenses(addExpensesRequest.getAmount(),addExpensesRequest.getCategory(),
                 foundUser.getId());
-        foundUser.getExpensesList().add(expenses);
         int compareTo = foundUser.getBudget().getAmount().compareTo(expenses.getAmount());
         if (compareTo < 0) {
             throw new IsExceedBudgetLimitException("Budget Limit Exceeded");
         }
+        foundUser.getHistory().getExpensesList().add(expenses);
+        foundUser.getHistory().setExpensesList(foundUser.getHistory().getExpensesList());
+        foundUser.getHistory().setAllTransaction(Collections.singletonList(foundUser.getHistory().getAllTransaction().add(expenses)));
         foundUser.setBalance(foundUser.getBalance().subtract(expenses.getAmount()));
+
         userRepository.save(foundUser);
     }
     @Override
@@ -91,17 +96,17 @@ public class UserServicesImpl implements  UserServices{
         int compareTo = foundUser.getBalance().compareTo(budget.getAmount());
         if (compareTo < 0) throw new BudgetCannotBeMoreThanIncomeException(budget.getAmount()+" is more than income");
         foundUser.setBudget(budget);
+        foundUser.getHistory().setAllTransaction(Collections.singletonList(foundUser.getHistory().getAllTransaction().add(budget)));
         userRepository.save(foundUser);
         return foundUser.getBudget();
     }
     @Override
-    public List<Object> getHistory(String mail) {
+    public History getHistory(String mail) {
         if (!userExist(mail)) throw new UserNotFoundException(
                 mail+" Doesn't Exist ");
         User foundUser = userRepository.findByEmail(mail);
         validateIfUserIsActive(foundUser);
-        History history = historyService.addToHistory(foundUser.getIncomeList(),foundUser.getExpensesList(),foundUser.getBudget());
-        return history.getAllTransaction();
+        return foundUser.getHistory();
     }
     @Override
     public List<Income> getAllIncomeList(String mail) {
@@ -109,8 +114,10 @@ public class UserServicesImpl implements  UserServices{
                 mail+" Doesn't Exist ");
         User foundUser = userRepository.findByEmail(mail);
         validateIfUserIsActive(foundUser);
-        History history = historyService.getAllIncome(foundUser.getIncomeList());
-        return history.getIncomeList();
+        List<Income> incomes = incomeService.getAllIncome();
+        historyService.saveAllIncome(incomes);
+        userRepository.save(foundUser);
+        return foundUser.getHistory().getIncomeList();
     }
     @Override
     public List<Expenses> getAllExpenses(String mail) {
@@ -118,11 +125,12 @@ public class UserServicesImpl implements  UserServices{
                 mail+" Doesn't Exist ");
         User foundUser = userRepository.findByEmail(mail);
         validateIfUserIsActive(foundUser);
-        History history = historyService.getAllExpenses(foundUser.getExpensesList());
-        return history.getExpensesList();
+        List<Expenses> expenses = expensesService.getAllExpenses();
+        History history = historyService.saveAllExpenses(expenses);
+        foundUser.setHistory(history);
+        userRepository.save(foundUser);
+        return foundUser.getHistory().getExpensesList();
     }
-
-
     private boolean userExist(String email) {
         User foundUser = userRepository.findByEmail(email);
         return foundUser != null;

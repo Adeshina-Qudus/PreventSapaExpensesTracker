@@ -7,6 +7,7 @@ import sapa.prevent.data.models.Income;
 import sapa.prevent.data.repositories.IncomeRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class IncomeServiceImpl  implements IncomeService{
@@ -24,5 +25,10 @@ public class IncomeServiceImpl  implements IncomeService{
         categoryService.addCategory(category);
         incomeRepository.save(income1);
         return income1;
+    }
+
+    @Override
+    public List<Income> getAllIncome() {
+        return incomeRepository.findAll();
     }
 }

@@ -7,7 +7,7 @@ import sapa.prevent.data.models.Expenses;
 import sapa.prevent.data.repositories.ExpensesRepository;
 
 import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.List;
 
 @Service
 public class ExpensesServicesImpl implements ExpensesService{
@@ -23,5 +23,11 @@ public class ExpensesServicesImpl implements ExpensesService{
         expensesRepository.save(expenses);
         return expenses;
     }
+
+    @Override
+    public List<Expenses> getAllExpenses() {
+        return expensesRepository.findAll();
+    }
+
 
 }

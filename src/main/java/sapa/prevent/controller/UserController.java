@@ -11,7 +11,6 @@ import sapa.prevent.services.UserServices;
 public class UserController {
     @Autowired
     private UserServices userServices;
-
     @PostMapping("registration")
     public ResponseEntity<?> registration(@RequestBody RegistrationRequest registrationRequest){
         RegistrationResponse registrationResponse = new RegistrationResponse();

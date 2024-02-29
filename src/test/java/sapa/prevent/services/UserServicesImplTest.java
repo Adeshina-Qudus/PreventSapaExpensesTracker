@@ -4,10 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import sapa.prevent.data.models.Category;
-import sapa.prevent.data.models.Expenses;
-import sapa.prevent.data.models.Income;
-import sapa.prevent.data.models.User;
+import sapa.prevent.data.models.*;
 import sapa.prevent.data.repositories.BudgetRepository;
 import sapa.prevent.data.repositories.HistoryRepository;
 import sapa.prevent.data.repositories.IncomeRepository;
@@ -302,8 +299,8 @@ public class UserServicesImplTest {
         addExpensesRequest.setCategory(category1);
         addExpensesRequest.setUserEmail("qudusa55@Gmail.com");
         userServices.addExpenses(addExpensesRequest);
-        List<Object> objectList = userServices.getHistory("qudusa55@Gmail.com");
-        assertEquals(3,objectList.size());
+        History history = userServices.getHistory("qudusa55@Gmail.com");
+        assertEquals(2,history.getAllTransaction().size());
     }
     @Test
     public void getAllIncomeTest(){
@@ -374,6 +371,7 @@ public class UserServicesImplTest {
         addExpensesRequest1.setUserEmail("qudusa55@Gmail.com");
         userServices.addExpenses(addExpensesRequest1);
         List<Expenses> expensesList = userServices.getAllExpenses("qudusa55@Gmail.com");
+
         assertEquals(2, expensesList.size());
     }
 

@@ -4,6 +4,7 @@ import sapa.prevent.data.models.Category;
 import sapa.prevent.data.models.Expenses;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 public interface ExpensesService {
@@ -12,4 +13,5 @@ public interface ExpensesService {
     Expenses addExpenses(BigDecimal amount, Category category, String id);
 
 
+    List<Expenses> getAllExpenses();
 }

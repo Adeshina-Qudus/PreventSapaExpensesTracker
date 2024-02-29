@@ -19,9 +19,10 @@ public class User {
     private String password;
     private LocalDateTime dateTime = LocalDateTime.now();
     private BigDecimal balance = new BigDecimal(0) ;
-    private ArrayList<Income> incomeList = new ArrayList<Income>();
-    private List<Expenses> expensesList = new ArrayList<Expenses>();
+//    private ArrayList<Income> incomeList = new ArrayList<Income>();
+//    private List<Expenses> expensesList = new ArrayList<Expenses>();
     private Budget budget;
     private boolean isLocked = false;
     private boolean isExceedBudget;
+    private History history = new History();
 }
