@@ -79,8 +79,8 @@ public class UserController {
     public ResponseEntity<?> addBudget(@RequestBody AddBudgetRequest addBudgetRequest){
         AddBudgetResponse addBudgetResponse = new AddBudgetResponse();
         try {
+            userServices.addBudget(addBudgetRequest);
             addBudgetResponse.setMessage("Your budget has been added successfully. Let's start managing your finances!");
-            addBudgetResponse.setBudget(userServices.addBudget(addBudgetRequest));
             return new ResponseEntity<>(new ApiResponse(true,addBudgetResponse),HttpStatus.CREATED);
         }catch (ExpensesTrackerException exception){
             addBudgetResponse.setMessage(exception.getMessage());

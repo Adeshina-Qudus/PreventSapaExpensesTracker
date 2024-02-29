@@ -18,13 +18,13 @@ public class HistoryServiceImpl implements HistoryService{
     @Override
     public void saveAllIncome(List<Income> incomeList) {
         history.setIncomeList(incomeList);
-        history.setAllTransaction(Collections.singletonList(history.getIncomeList()));
+        history.setAllTransaction(Collections.singletonList(history.getIncomeList().toString()));
         historyRepository.save(history);
     }
     @Override
     public History saveAllExpenses(List<Expenses> expensesList) {
         history.setExpensesList(expensesList);
-        history.setAllTransaction(Collections.singletonList(history.getIncomeList()));
+        history.setAllTransaction(Collections.singletonList(history.getIncomeList().toString()));
         historyRepository.save(history);
         return history;
     }

@@ -13,7 +13,6 @@ public class CategoryServiceImpl implements  CategoryService {
     @Override
     public void addCategory(Category category) {
         Category category1 = new Category();
-        category1.setId(category1.getId());
         category1.setNameOfCategory(category.getNameOfCategory());
         categoryRepository.save(category1);
     }

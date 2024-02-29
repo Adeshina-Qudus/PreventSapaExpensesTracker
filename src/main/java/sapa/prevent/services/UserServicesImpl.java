@@ -50,7 +50,7 @@ public class UserServicesImpl implements  UserServices{
         founduser.setBalance(founduser.getBalance().add(income.getAmountOfIncome()));
         founduser.getHistory().getIncomeList().add(income);
         founduser.getHistory().setIncomeList(founduser.getHistory().getIncomeList());
-        founduser.getHistory().setAllTransaction(Collections.singletonList(founduser.getHistory().getAllTransaction().add(income)));
+        founduser.getHistory().setAllTransaction(Collections.singletonList((founduser.getHistory().getIncomeList().toString())));
         userRepository.save(founduser);
     }
     private static void validateIfUserIsActive(User founduser) {
@@ -79,15 +79,14 @@ public class UserServicesImpl implements  UserServices{
         if (compareTo < 0) {
             throw new IsExceedBudgetLimitException("Budget Limit Exceeded");
         }
+        foundUser.setBalance(foundUser.getBalance().subtract(expenses.getAmount()));
         foundUser.getHistory().getExpensesList().add(expenses);
         foundUser.getHistory().setExpensesList(foundUser.getHistory().getExpensesList());
-        foundUser.getHistory().setAllTransaction(Collections.singletonList(foundUser.getHistory().getAllTransaction().add(expenses)));
-        foundUser.setBalance(foundUser.getBalance().subtract(expenses.getAmount()));
-
+        foundUser.getHistory().setAllTransaction(Collections.singletonList(foundUser.getHistory().getExpensesList().toString()));
         userRepository.save(foundUser);
     }
     @Override
-    public Object addBudget(AddBudgetRequest addBudgetRequest) {
+    public void addBudget(AddBudgetRequest addBudgetRequest) {
         if (!userExist(addBudgetRequest.getEmail())) throw new UserNotFoundException(
                 addBudgetRequest.getEmail()+" Doesn't Exist ");
         User foundUser = userRepository.findByEmail(addBudgetRequest.getEmail());
@@ -96,9 +95,7 @@ public class UserServicesImpl implements  UserServices{
         int compareTo = foundUser.getBalance().compareTo(budget.getAmount());
         if (compareTo < 0) throw new BudgetCannotBeMoreThanIncomeException(budget.getAmount()+" is more than income");
         foundUser.setBudget(budget);
-        foundUser.getHistory().setAllTransaction(Collections.singletonList(foundUser.getHistory().getAllTransaction().add(budget)));
         userRepository.save(foundUser);
-        return foundUser.getBudget();
     }
     @Override
     public History getHistory(String mail) {

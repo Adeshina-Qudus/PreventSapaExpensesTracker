@@ -13,9 +13,9 @@ import java.util.List;
 @ToString(exclude = {"incomeList", "expensesList"})
 public class History {
     private String id;
-    @JsonIgnore
+//   @JsonIgnore
     private List<Income> incomeList = new ArrayList<>();
-    @JsonIgnore
+//    @JsonIgnore
     private List<Expenses> expensesList = new ArrayList<>();
-    private List<Object> allTransaction = new ArrayList<>();
+    private List<String> allTransaction = new ArrayList<>();
 }

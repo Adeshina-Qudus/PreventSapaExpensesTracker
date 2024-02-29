@@ -14,7 +14,7 @@ public interface UserServices {
     void addIncome(AddIncomeRequest addIncomeRequest);
     BigDecimal getBalance(String email);
     void addExpenses(AddExpensesRequest addExpensesRequest);
-    Object addBudget(AddBudgetRequest addBudgetRequest);
+    void addBudget(AddBudgetRequest addBudgetRequest);
     History getHistory(String mail);
     List<Income> getAllIncomeList(String mail);
     List<Expenses> getAllExpenses(String mail);
